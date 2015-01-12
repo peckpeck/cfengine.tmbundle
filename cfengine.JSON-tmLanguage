@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+ <key>bundleUUID</key>
+ <string>511ffa1d-e72d-4074-a299-a8a648e82ec3</string>
+ <key>comment</key>
+ <string>
+ todo:
+ list comprehension / generator comprehension scope.
+ </string>
+ <key>fileTypes</key>
+ <array>
+ <string>cf</string>
+ <string>cf3</string>
+ </array>
+  <key>scopeName</key>
+  <string>source.cfengine</string>
+  </dict>
+  </plist>
+    {
+      "name": "string.quoted.double.untitled",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "begin": "\\${",
+          "end": "}", 
+          "patterns": [
+            { "name": "variable.other", "match": "\\${.*?}" }
+          ]
+        },
+        { "name": "constant.character", "match": "[^${}()]" },
+        { "name": "invalid.illegal.unknown-escape.cfengine", "match": "[${}()]" }
+      ]
+    },
+
+
+
+
+
+{
+  "comment": "list comprehension / generator comprehension scope.",
+  "fileTypes": [ "cf", "cf3" ],
+  "scopeName": "source.cfengine",
+  "patterns": [
+    { "name": "comment.line.number-sign.cfengine", 
+      "match": "#.*" 
+    },
+    { "match": "\\$\\(.*?\\)|\\${.*?}",
+      "name": "variable.other"
+    },
+    { "include": "#string" },
+    { "match": "^\\s*(bundle|body)\\s+(\\w+)\\s+(\\w+)(?:\\s*\\(.*?\\))?\\s*{",
+      "captures": {
+        "1": { "name": "storage.type.class.cfengine" },
+        "2": { "name": "storage.type.class.cfengine" },
+        "3": { "name": "entity.name.type.cfengine" },
+        "4": { "name": "markup.underline.cfengine" }
+      }
+    },
+    { "match": "^\\s*(\\w+):(?!:)",
+      "name": "entity.name.section.cfengine"
+    },
+    { "match": "\\b(\\w+)\\s*(=>)",
+      "captures": {
+        "1": { "name": "entity.name.tag.cfengine" },
+        "2": { "name": "keyword.operator" }
+      }
+    }
+  ],
+  "repository": {
+    "parameter": {
+      "name": "variable.parameter.cfengine",
+      "match": "\\w+"
+    },
+    "variable": {
+      "name": "variable.other.cfengine",
+      "match": "\\w+"
+    },
+    "string": {
+      "name": "string.quoted.double.untitled",
+      "begin": "\"",
+      "end": "\""
+    }
+  }
+}
