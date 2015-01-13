@@ -1,0 +1,332 @@
+"comment": "Grammar that match cfengine code syntax",
+"fileTypes": ["cf", "cf3"],
+"scopeName": "source.cfengine",
+
+# Main file : only comments, body and bundle
+"patterns": [{
+  "include": "#comment"
+}, {
+  "include": "#body"
+}, {
+  "include": "#bundle"
+}, {
+  # catch syntax error
+  "match": "[^\\s]+",
+  "name": "invalid.illegal"
+}],
+
+"repository": {
+  # comment can be almost everywhere, include at the begining of patterns
+  "comment": {
+    "name": "comment.line.number-sign.cfengine",
+    "match": "#.*"
+  },
+  # allow separator only and consider everything else broken, include at the end of list patterns
+  "separator": {
+    # \w should be a syntax error, but adding it allows for a nice catch up case of error
+    "match": "[^\\s,\\w]+",
+    "name": "invalid.illegal"
+  },
+  "parameter": {
+    "name": "variable.parameter.cfengine",
+    "match": "\\w+"
+  },
+  "variable": {
+    "patterns": [{
+      # with parens syntax
+      "match": "$\\(.*\\)",
+      "name": "variable.other.cfengine"
+    }, {
+      # with brace syntax
+      "match": "${.*}",
+      "name": "variable.other.cfengine"
+    }]
+  },
+  "string_s": {
+    "name": "string.quoted.double.untitled.cfengine",
+    "begin": "'",
+    "end": "(?<!\\\\)'"
+  },
+  "string_d": {
+    "name": "string.quoted.double.untitled.cfengine",
+    "begin": "\"",
+    "end": "(?<!\\\\)\""
+  },
+  "string": {
+    "patterns": [{
+      # double quote string
+      "name": "string.quoted.double.untitled.cfengine",
+      "begin": "\"",
+      "end": "(?<!\\\\)\""
+    }, {
+      # single quote string
+      "name": "string.quoted.double.untitled.cfengine",
+      "begin": "'",
+      "end": "(?<!\\\\)'"
+    }]
+  },
+  # can be : function call, string, variable, litteral
+  "scalar": { 
+    "patterns": [{
+      "include": "#call"
+    }, {
+      "include": "#string"
+    }, {
+      "include": "#variable"
+    }, {
+      "name": "variable.other.cfengine",
+      "match": "\\w+"
+    }]
+  },
+  # function call
+  "call": {
+    "begin": "(\\w+)\\s*\\(",
+    "beginCaptures": {
+      "1": {
+        "name": "variable.other.cfengine"
+      }
+    },
+    "end": "\\)",
+    "patterns": [{
+      "include": "#comment"
+    }, {
+      "include": "#scalar"
+    }, {
+      "include": "#separator"
+    }]
+  },
+  "attribute": {
+    "match": "(\\w+)\\s*(=>)",
+    "captures": {
+      "1": {
+        "name": "entity.name.tag.cfengine"
+      },
+      "2": {
+        "name": "keyword.operator.cfengine"
+      }
+    }
+  },
+  "list": {
+    "begin": "{",
+    "end": "}",
+    "patterns": [{
+      "include": "#comment"
+    }, { 
+      # list include with brace syntax
+      "match": "@{([\\w.]+)}",
+      "captures": {
+        "1": {
+          "name": "variable.other.cfengine"
+        }
+      }
+    }, { 
+      # list include with parens syntax
+      "match": "@\\(([\\w.]+)\\)",
+      "captures": {
+        "1": {
+          "name": "variable.other.cfengine"
+        }
+      }
+    }, {
+      "include": "#scalar"
+    }, {
+      "include": "#separator"
+    }]
+  },
+  "class": {
+    "match": "^\\s*(\\S+)::",
+    "captures": {
+      "1": {
+        "patterns": [{
+          "match": "\\w+",
+          "name": "constant.language.cfengine"
+        }, {
+          "match": "[^\\s!.|&()]+",
+          "name": "invalid.illegal"
+        }]
+      }
+    }
+  },
+  "body": {
+    "begin": "^\\s*body\\s+.*",
+    "beginCaptures": {
+      "0": {
+        "patterns": [{
+          "include": "#comment"
+        }, {
+          "begin": "^\\s*(body)\\s+(common|agent|server|monitor|runagent|executor|knowledge|hub|reporter|file)\\s+(control)\\s*([^{]?)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.class.cfengine"
+            },
+            "2": {
+              "name": "storage.type.class.cfengine"
+            },
+            "3": {
+              "name": "entity.name.type.cfengine"
+            },
+            "4": {
+              "name": "invalid.illegal"
+            }
+          },
+          "end": "{"
+        }, {
+          "begin": "^\\s*(body)\\s+(action|classes|contain|acl|changes|copy_from|delete|depth_search|edit_defaults|file_select|link_from|perms|rename|tcp_ip|package_method|process_count|process_select|service_method|mount|volume|printfile|match_value|association|select_region|delete_select|insert_select|location|edit_field|replace_with|common|database_server|environment_resources)\\s+(\\w+)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.class.cfengine"
+            },
+            "2": {
+              "name": "storage.type.class.cfengine"
+            },
+            "3": {
+              "name": "entity.name.type.cfengine"
+            }
+          },
+          "end": "{",
+          "patterns": [{
+            "include": "#comment"
+          }, {
+            "begin": "\\(",
+            "end": "\\)",
+            "patterns": [{
+              "include": "#comment"
+            }, {
+              "include": "#parameter"
+            }, {
+              "include": "#separator"
+            }]
+          }]
+        }, {
+          "match": "^\\s*(body)\\s+(\\S+)\\s+(\\w+)",
+          "captures": {
+            "1": {
+              "name": "storage.type.class.cfengine"
+            },
+            "2": {
+              "name": "invalid.illegal"
+            },
+            "3": {
+              "name": "entity.name.type.cfengine"
+            }
+          }
+        }]
+      }
+    },
+    "end": "}",
+    "patterns": [{
+      "include": "#comment"
+    }, {
+      "include": "#class"
+    }, {
+      "begin": "(\\w+)\\s*(=>)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.tag.cfengine"
+        },
+        "2": {
+          "name": "keyword.operator.cfengine"
+        }
+      },
+      "end": ";",
+      "patterns": [{
+        "include": "#list"
+      }, {
+        "include": "#scalar"
+      }]
+    }]
+  },
+  "bundle": {
+    "begin": "^\\s*bundle\\s+.*",
+    "beginCaptures": {
+      "0": {
+        "patterns": [{
+          "include": "#comment"
+        }, {
+          "begin": "^\\s*(bundle)\\s+(agent|common|server|knowledge|monitor|edit_line|edit_xml)\\s+(\\w+)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.class.cfengine"
+            },
+            "2": {
+              "name": "storage.type.class.cfengine"
+            },
+            "3": {
+              "name": "entity.name.type.cfengine"
+            }
+          },
+          "end": "{",
+          "patterns": [{
+            "include": "#comment"
+          }, {
+            "begin": "\\(",
+            "end": "\\)",
+            "patterns": [{
+              "include": "#comment"
+            }, {
+              "include": "#parameter"
+            }, {
+              "include": "#separator"
+            }]
+          }]
+        }, {
+          "match": "^\\s*(bundle)\\s+(\\S+)\\s+(\\w+)",
+          "captures": {
+            "1": {
+              "name": "storage.type.class.cfengine"
+            },
+            "2": {
+              "name": "invalid.illegal"
+            },
+            "3": {
+              "name": "entity.name.type.cfengine"
+            }
+          }
+        }]
+      }
+    },
+    "end": "}",
+    "patterns": [{
+      "include": "#comment"
+    }, {
+      "match": "^\\s*(vars|classes|reports|meta|commands|databases|files|interfaces|methods|packages|storage|access|measurements|roles|topics|occurrences|defaults|control|guest_environments|outputs|processes|services|things|delete_lines|field_edits|insert_lines|replace_patterns):(?!:)",
+      "captures": {
+        "1": {
+          "name": "entity.name.section.cfengine"
+        }
+      }
+    }, {
+      "match": "^\\s*(\\w+):(?!:)",
+      "captures": {
+        "1": {
+          "name": "invalid.illegal"
+        }
+      }
+    }, {
+      "include": "#class"
+    }, {
+      "begin": "([\"']).*?\\1",
+      "beginCaptures": {
+        "0": {
+          "patterns": [{
+            "include": "#string_s"
+          }, {
+            "include": "#string_b"
+          }]
+        }
+      },
+      "end": ";",
+      "patterns": [{
+        "include": "#comment"
+      }, {
+        "include": "#attribute"
+      }, {
+        "include": "#list"
+      }, {
+        "include": "#scalar"
+      }, {
+        "include": "#separator"
+      }]
+    }]
+  }
+}

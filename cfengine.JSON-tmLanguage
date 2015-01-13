@@ -3,37 +3,154 @@
   "fileTypes": [ "cf", "cf3" ],
   "scopeName": "source.cfengine",
   "patterns": [
-    { "name": "comment.line.number-sign.cfengine", 
-      "match": "#.*" 
+    { "include": "#comment" },
+    { "begin": "^\\s*body\\s+.*",
+      "beginCaptures": {
+        "0": { "patterns": [
+          { "include": "#comment" },
+          {
+            "begin": "^\\s*(body)\\s+(common|agent|server|monitor|runagent|executor|knowledge|hub|reporter|file)\\s+(control)\\s*([^{]?)",
+            "beginCaptures": {
+              "1": { "name": "storage.type.class.cfengine" },
+              "2": { "name": "storage.type.class.cfengine" },
+              "3": { "name": "entity.name.type.cfengine" },
+              "4": { "name": "invalid.illegal" }
+            },
+            "end": "{"
+          }, 
+          {
+            "begin": "^\\s*(body)\\s+(action|classes|contain|acl|changes|copy_from|delete|depth_search|edit_defaults|file_select|link_from|perms|rename|tcp_ip|package_method|process_count|process_select|service_method|mount|volume|printfile|match_value|association|select_region|delete_select|insert_select|location|edit_field|replace_with|common|database_server|environment_resources)\\s+(\\w+)",
+            "beginCaptures": {
+              "1": { "name": "storage.type.class.cfengine" },
+              "2": { "name": "storage.type.class.cfengine" },
+              "3": { "name": "entity.name.type.cfengine" }
+            },
+            "end": "{",
+            "patterns": [ 
+              { "include": "#comment" },
+              { "begin": "\\(",
+                "end": "\\)",
+                "patterns": [ 
+                  { "include": "#comment" },
+                  { "include": "#parameter" },
+                  { "include": "#separator" }
+                ]
+              }
+            ]
+          }, 
+          { "match": "^\\s*(body)\\s+(\\S+)\\s+(\\w+)",
+            "captures": {
+              "1": { "name": "storage.type.class.cfengine" },
+              "2": { "name": "invalid.illegal" },
+              "3": { "name": "entity.name.type.cfengine" }
+            }
+          }
+        ] }
+      },
+      "end": "}",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#class" },
+        { 
+          "begin": "(\\w+)\\s*(=>)",
+          "beginCaptures": {
+            "1": { "name": "entity.name.tag.cfengine" },
+            "2": { "name": "keyword.operator" }
+          },
+          "end": ";",
+          "patterns": [
+            { "include": "#list" },
+            { "include": "#function" },
+            { "include": "#string" },
+            { "include": "#value" }
+          ]
+        }
+      ]
     },
-    { "match": "\\$\\(.*?\\)|\\${.*?}",
-      "name": "variable.other"
+    { "begin": "^\\s*bundle\\s+.*",
+      "beginCaptures": {
+        "0": { "patterns": [
+          { "include": "#comment" },
+          { "begin": "^\\s*(bundle)\\s+(agent|common|server|knowledge|monitor|edit_line|edit_xml)\\s+(\\w+)",
+            "beginCaptures": {
+              "1": { "name": "storage.type.class.cfengine" },
+              "2": { "name": "storage.type.class.cfengine" },
+              "3": { "name": "entity.name.type.cfengine" }
+            },
+            "end": "{",
+            "patterns": [ 
+              { "include": "#comment" },
+              { "begin": "\\(",
+                "end": "\\)",
+                "patterns": [ 
+                  { "include": "#comment" },
+                  { "include": "#parameter" },
+                  { "include": "#separator" }
+                ]
+              }
+            ]
+          },
+          { "match": "^\\s*(bundle)\\s+(\\S+)\\s+(\\w+)",
+            "captures": {
+              "1": { "name": "storage.type.class.cfengine" },
+              "2": { "name": "invalid.illegal" },
+              "3": { "name": "entity.name.type.cfengine" }
+            }
+          }
+        ] }
+      },
+      "end": "}",
+      "patterns": [
+        { "include": "#comment" },
+        {
+          "match": "^\\s*(vars|classes|reports|meta|commands|databases|files|interfaces|methods|packages|storage|access|measurements|roles|topics|occurrences|defaults|control|guest_environments|outputs|processes|services|things|delete_lines|field_edits|insert_lines|replace_patterns):(?!:)",
+          "captures": {
+            "1": { "name": "entity.name.section.cfengine" }
+          }
+        },
+        { "match": "^\\s*([^:]+):(?!:)",
+          "captures": {
+            "1": { "name": "invalid.illegal" }
+          }
+        },
+        { "include": "#class" },
+        {
+          "begin": "\\\".*?\\\"",
+          "beginCaptures": {
+            "0": { "patterns": [
+              { "include": "#string" }
+            ] }
+          },
+          "end": ";",
+          "patterns": [
+            { "include": "#comment" },
+            { "include": "#attribute" },
+            { "include": "#function" },
+            { "include": "#string"},
+            { "include": "#value" },
+            { "include": "#separator" }
+          ]
+        }
+      ]
     },
-    { "include": "#string" },
-    { "match": "^\\s*(bundle|body)\\s+(\\w+)\\s+(\\w+)(?:\\s*\\(.*?\\))?\\s*{",
-      "captures": {
-        "1": { "name": "storage.type.class.cfengine" },
-        "2": { "name": "storage.type.class.cfengine" },
-        "3": { "name": "entity.name.type.cfengine" },
-        "4": { "name": "markup.underline.cfengine" }
-      }
-    },
-    { "match": "^\\s*(\\w+):(?!:)",
-      "name": "entity.name.section.cfengine"
-    },
-    { "match": "\\b(\\w+)\\s*(=>)",
-      "captures": {
-        "1": { "name": "entity.name.tag.cfengine" },
-        "2": { "name": "keyword.operator" }
-      }
+    { "match": "[^\\s]+",
+      "name": "invalid.illegal"
     }
   ],
   "repository": {
+    "comment": { 
+      "name": "comment.line.number-sign.cfengine", 
+      "match": "#.*" 
+    },
     "parameter": {
       "name": "variable.parameter.cfengine",
       "match": "\\w+"
     },
-    "variable": {
+    "separator": {
+      "match": "[^\\s,]+",
+      "name": "invalid.illegal"
+    },
+    "value": {
       "name": "variable.other.cfengine",
       "match": "\\w+"
     },
@@ -41,6 +158,46 @@
       "name": "string.quoted.double.untitled",
       "begin": "\"",
       "end": "\""
-    }
+    },
+    "function": {
+      "begin": "(\\w+)\\s*\\(",
+      "beginCaptures": {
+        "1": { "name": "variable.other.cfengine" }
+      },
+      "end": "\\)",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#function" },
+        { "include": "#string"},
+        { "include": "#value" },
+        { "include": "#separator" }
+      ]
+    },
+    "attribute": { 
+      "match": "(\\w+)\\s*(=>)",
+      "captures": {
+        "1": { "name": "entity.name.tag.cfengine" },
+        "2": { "name": "keyword.operator" }
+      }
+    },
+    "list": { 
+      "begin": "{",
+      "end": "}",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#list_value" },
+        { "include": "#function" },
+        { "include": "#string"},
+        { "include": "#value" },
+        { "include": "#separator" }        
+      ]
+    },
+    "list_value": {
+      "match": "@{([\\w.]+)}",
+      "captures": {
+        "1": { "name": "variable.other.cfengine" }
+      }
+    },
+    "class": { "match": "^\\s*([^:]+)::" }
   }
 }
